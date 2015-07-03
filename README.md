@@ -1,2 +1,2 @@
 # huaquan
-huaquan game
+game for fun
