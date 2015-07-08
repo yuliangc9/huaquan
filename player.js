@@ -294,6 +294,8 @@ Player.prototype.registerPeer = function(p)
 
     p.on("fail", function(code)
     {
+        self.state = Player.STATE.WIN;
+
         self.log.info("get peer fail %s", code);
         self.sendPeerFail(code);
     });
@@ -339,6 +341,8 @@ Player.prototype.leave = function()
 Player.prototype.getFail = function(msg)
 {
     var self = this;
+
+    self.state = Player.STATE.LOSE;
 
     self.log.info("get fail msg %s", msg);
     self.emit("fail", msg);
