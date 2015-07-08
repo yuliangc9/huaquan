@@ -34,11 +34,23 @@ newPlayer.emit("findPeer");
 输赢的判断在服务端进行，服务端会通过`peerLose`和`peerWin`事件通知客户端，客户端不需要判断数字的逻辑处理；
  - `selfChoose` 表示玩家选择的自己的数字
  - `peerChose` 表示玩家选择的对方的数字
+```js
+player.on("peerInfo", function(peerid)
+{
+    console.log("peer is %s", peerid);
+    
+    player.emit("choose", 3, 9);
+});
+```
 
 ##selfFail::emit (code:str)
 当客户端判断本方玩家输时（例如玩家选择数字超时），向服务器触发这个事件，通知具体的失败信息；
  - `code` 表示失败的原因，可取如下值：
     - `timeout` 表示超时
+```js
+if (timeout)
+    player.emit("selfFail", "timeout");
+```
 
 ##peerLose/peerWin::listen (code:str) 
 服务端通知客户端对方玩家输/赢，如果客户端收到这个消息，则表示本方玩家赢/输；
@@ -46,3 +58,13 @@ newPlayer.emit("findPeer");
     - `bingo` 本方玩家猜中对方数字
     - `timeout` 对方玩家选择超时
     - `leave` 对方玩家退出
+```js
+player.on("peerLose", function(code)
+{
+    console.log("I win! reason is %s", code);
+});
+player.on("peerWin", function(code)
+{
+    console.log("I lose! reason is %s", code);
+});
+```
