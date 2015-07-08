@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var FileStreamRotator = require('file-stream-rotator');
 var config = require("./conf");
+var fs = require("fs");
 
 var index = require('./routes/index');
 var test = require('./routes/test');
@@ -18,6 +19,8 @@ app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
+
+fs.existsSync("log") || fs.mkdirSync("log");
 
 // config log
 var accessLogStream = FileStreamRotator.getStream({

@@ -195,6 +195,34 @@ Player.prototype.sendPeerInfo = function(p)
 }
 
 /**
+ * judege two player which is winner, return the winner
+ * @param player1
+ * @param player2
+ * @returns {*}
+ */
+function judgeWinOrLose(player1, player2)
+{
+    if(player1.selfChoose == player2.peerChoose && player1.peerChoose != player2.selfChoose)
+    {
+        player1.state = Player.STATE.LOSE;
+        player2.state = Player.STATE.WIN;
+
+        player2.log.info("i win!");
+        return player2;
+    }
+    else if(player1.selfChoose != player2.peerChoose && player1.peerChoose == player2.selfChoose)
+    {
+        player1.state = Player.STATE.WIN;
+        player2.state = Player.STATE.LOSE;
+
+        player1.log.info("i win");
+        return player1;
+    }
+
+    return null;
+}
+
+/**
  * bind a player to start game
  * @param p : peer player
  */
@@ -216,19 +244,7 @@ Player.prototype.registerPeer = function(p)
             p.sendPeerChoose(self.selfChoose, self.peerChoose);
 
             //2. judge who win who lose
-            if(self.selfChoose == p.peerChoose && self.peerChoose != p.selfChoose)
-            {
-                self.state = Player.STATE.LOSE;
-                p.state = Player.STATE.WIN;
-            }
-            else if(self.selfChoose != p.peerChoose && self.peerChoose == p.selfChoose)
-            {
-                self.state = Player.STATE.WIN;
-                p.state = Player.STATE.LOSE;
-            }
-
-            self.log.debug("win or lose");
-            p.log.debug("win or lose");
+            judgeWinOrLose(self, p);
 
             //3.. clear choose data
             self.clearChoose();
