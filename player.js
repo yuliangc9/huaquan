@@ -6,6 +6,12 @@ var logger = require("./logger");
 var util = require("util");
 var EventEmitter     = require("events").EventEmitter;
 
+var WIN_LOSE_CODE = {
+    BINGO : "bingo",
+    TIMEOUT : "timeout",
+    LEAVE : "leave"
+}
+
 /*
  class Player
  @param s : io socket from client
@@ -84,11 +90,13 @@ Player.prototype.findPeer = function()
     var p = getWaitingPlayer();
     if (p)
     {
+        self.log.info("find peer conid:%s", p.conid);
         p.registerPeer(self);
         self.registerPeer(p);
     }
     else
     {
+        self.log.info("wait in queue");
         insertWaitingPlayer(self);
     }
 
@@ -113,7 +121,7 @@ Player.prototype.getChoose = function(selfData, peerData)
         self.emit("choose");
     }
 
-    self.log.info("get choose data %s %s", selfData, peerData);
+    self.log.info("get choose data");
 }
 
 /**
@@ -176,11 +184,24 @@ Player.prototype.sendPeerChoose = function(peerSelfData, peerPeerData)
  * tell player the peer fail
  * @param msg
  */
-Player.prototype.sendPeerFail = function(msg)
+Player.prototype.sendPeerFail = function(code)
 {
     var self = this;
 
-    self.socket.emit("peerFail", msg);
+    self.socket.emit("peerLose", code);
+
+    return;
+}
+
+/**
+ * tell player the peer win. so this player lose
+ * @param code
+ */
+Player.prototype.sendPeerWin = function(code)
+{
+    var self = this;
+
+    self.socket.emit("peerWin", code);
 
     return;
 }
@@ -191,6 +212,9 @@ Player.prototype.sendPeerFail = function(msg)
  */
 Player.prototype.sendPeerInfo = function(p)
 {
+    var self = this;
+
+    self.log.debug("tell peer conid %s", p.conid);
     self.socket.emit("peerInfo", p.conid);
 }
 
@@ -202,20 +226,35 @@ Player.prototype.sendPeerInfo = function(p)
  */
 function judgeWinOrLose(player1, player2)
 {
+    var winner = null;
+    var loser = null;
+
     if(player1.selfChoose == player2.peerChoose && player1.peerChoose != player2.selfChoose)
     {
+        winner = player2;
+        loser = player1;
         player1.state = Player.STATE.LOSE;
         player2.state = Player.STATE.WIN;
 
         player2.log.info("i win!");
+
+        player1.sendPeerWin(WIN_LOSE_CODE.BINGO);
+        player2.sendPeerFail(WIN_LOSE_CODE.BINGO);
+
         return player2;
     }
     else if(player1.selfChoose != player2.peerChoose && player1.peerChoose == player2.selfChoose)
     {
+        winner = player1;
+        loser = player2;
         player1.state = Player.STATE.WIN;
         player2.state = Player.STATE.LOSE;
 
         player1.log.info("i win");
+
+        player2.sendPeerWin(WIN_LOSE_CODE.BINGO);
+        player1.sendPeerFail(WIN_LOSE_CODE.BINGO);
+
         return player1;
     }
 
@@ -231,6 +270,7 @@ Player.prototype.registerPeer = function(p)
     var self = this;
 
     self.state = Player.STATE.PLAYING;
+    self.peerid = p.conid;
 
     p.on("choose", function()
     {
@@ -252,10 +292,10 @@ Player.prototype.registerPeer = function(p)
         }
     });
 
-    p.on("fail", function(msg)
+    p.on("fail", function(code)
     {
-        self.log.info("get peer fail %s", msg);
-        self.sendPeerFail(msg);
+        self.log.info("get peer fail %s", code);
+        self.sendPeerFail(code);
     });
 
     self.sendPeerInfo(p);
@@ -275,7 +315,7 @@ Player.prototype.leave = function()
     //1. judge whether is fail
     if(self.state == Player.STATE.PLAYING)
     {
-        self.emit("fail", "runAway");
+        self.emit("fail", WIN_LOSE_CODE.LEAVE);
     }
 
     //2. delete from global info

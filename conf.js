@@ -15,14 +15,19 @@ module.exports =
         pattern : "YYYY-MM-DD-HH",
         frequency : "1h"
     },
-    ws_log : {
-        filename : path.join(__dirname + '/log/hq.log'),
-        type : "dateFile",
-        pattern : "-yyyy-MM-dd-hh",
-        alwaysIncludePattern : false,
-        category: 'huaquan',
-        ws_level : "DEBUG" //TRACE/DEBUG/INFO/WARN/ERROR/FATAL
-    },
+    ws_log : [
+        {
+            type : 'console'
+        },
+        {
+            filename : path.join(__dirname + '/log/hq.log'),
+            type : "dateFile",
+            pattern : "-yyyy-MM-dd-hh",
+            alwaysIncludePattern : false,
+            category: 'huaquan',
+            ws_level : "DEBUG" //TRACE/DEBUG/INFO/WARN/ERROR/FATAL
+        }
+    ],
 
     //http server 调试模式
     http_debug : true
