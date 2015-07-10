@@ -8,6 +8,7 @@ module.exports =
     //端口配置
     http_port : 8080,
     ws_port : 3030,
+    ws_ip : "127.0.0.1",
 
     //日志配置
     http_log : {

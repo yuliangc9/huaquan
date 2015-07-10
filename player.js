@@ -13,7 +13,7 @@ var WIN_LOSE_CODE = {
 }
 
 /*
- class Player
+ class PlayerClient
  @param s : io socket from client
  */
 function Player(s)
@@ -112,6 +112,8 @@ Player.prototype.getChoose = function(selfData, peerData)
 {
     var self = this;
 
+    self.log.info("get choose data %s %s", selfData, peerData);
+
     //format data to str
     selfData += '';
     peerData += '';
@@ -120,8 +122,6 @@ Player.prototype.getChoose = function(selfData, peerData)
     {
         self.emit("choose");
     }
-
-    self.log.info("get choose data");
 }
 
 /**

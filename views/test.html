@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>test</title>
+    <script type="text/javascript" src="js/vendor/jquery.js"></script>
+    <script type="text/javascript" src="js/player.js"></script>
+    <script type="text/javascript" src="js/socket.io/socket.io.js"></script>
+</head>
+<body>
+WE ARE TESTS!!
+<button type="button" class="bingo_win_lose">猜对数字</button>
+<button type="button" class="timeout_win_lose">对方超时胜利</button>
+<button type="button" class="leave_win_lose">对方离开胜利</button>
+
+<script>
+    $(function(){
+        function _startPlay(player, type, self_chooses)
+        {
+            player.registerLeave(function()
+            {
+                alert(type + " leave game");
+            });
+            player.registerWin(function(code)
+            {
+                alert(type + " win! reason is " + code);
+                player.leave();
+            });
+            player.registerLose(function(code)
+            {
+                alert(type + "lose! reason is " + code);
+                player.leave();
+            });
+            player.registerPeerChoose(function(peerSelf, peerPeer)
+            {
+                console.log(type, "get peer data ", peerSelf, peerPeer);
+                var s = self_chooses.shift();
+                var p = self_chooses.shift();
+
+                if (s&&p)
+                {
+                    player.choose(s, p);
+                }
+            });
+        }
+
+        $(".bingo_win_lose").click(function(){
+            var winner = new PlayerClient();
+            var loser = new PlayerClient();
+
+            winner.connect(function(err)
+            {
+                console.log("winner connect ", err);
+
+                winner.findPeer(function(err, peerid)
+                {
+                    console.log("winner find peer ", peerid);
+                    winner.choose(3,4);
+                    _startPlay(winner, 'winner', [4,4,8,9,3,2]);
+                });
+            });
+
+            loser.connect(function(err)
+            {
+                console.log("loser connect ", err);
+
+                loser.findPeer(function(err, peerid)
+                {
+                    console.log("loser find peer ", peerid);
+                    loser.choose(8,8);
+                    _startPlay(loser, 'loser', [5,6,9,8,2,8]);
+                });
+            });
+        });
+
+        $(".timeout_win_lose").click(function(){
+            var winner = new PlayerClient();
+            var loser = new PlayerClient();
+
+            winner.connect(function(err)
+            {
+                console.log("winner connect ", err);
+
+                winner.findPeer(function(err, peerid)
+                {
+                    console.log("winner find peer ", peerid);
+                    _startPlay(winner, 'winner', []);
+                });
+            });
+
+            loser.connect(function(err)
+            {
+                console.log("loser connect ", err);
+
+                loser.findPeer(function(err, peerid)
+                {
+                    console.log("loser find peer ", peerid);
+                    _startPlay(loser, 'loser', []);
+                    loser.sendFail('timeout');
+                });
+            });
+        });
+
+        $(".leave_win_lose").click(function(){
+            var winner = new PlayerClient();
+            var loser = new PlayerClient();
+
+            winner.connect(function(err)
+            {
+                console.log("winner connect ", err);
+
+                winner.findPeer(function(err, peerid)
+                {
+                    console.log("winner find peer ", peerid);
+                    _startPlay(winner, 'winner', []);
+                });
+            });
+
+            loser.connect(function(err)
+            {
+                console.log("loser connect ", err);
+
+                loser.findPeer(function(err, peerid)
+                {
+                    console.log("loser find peer ", peerid);
+                    _startPlay(loser, 'loser', []);
+                    loser.leave();
+                });
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

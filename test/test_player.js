@@ -53,10 +53,16 @@ function play(player, peerChooses, code_cb)
 
         if(chooseSelf && choosePeer)
         {
-            if(chooseSelf < 0 || choosePeer < 0)
+            if(chooseSelf == -1 || choosePeer == -1)
             {
                 player.close();
                 code_cb && code_cb(WIN_LOSE_CODE.LEAVE);
+                return -1;
+            }
+            else if(chooseSelf == -2 || -2 == choosePeer)
+            {
+                player.emit("selfFail", WIN_LOSE_CODE.TIMEOUT);
+                code_cb && code_cb(WIN_LOSE_CODE.TIMEOUT);
                 return -1;
             }
             else
@@ -145,3 +151,4 @@ function testChoose(winChooses, loseChooses)
 testChoose([3,8,3,9,6,6,5,7], [4,4,4,4,4,4,7,7]);
 testChoose([3,3], [3,4]);
 testChoose([3,8,9,0], [4,4,-1,-1]);
+testChoose([3,8,9,1], [4,4,-2,-2]);
