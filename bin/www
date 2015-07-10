@@ -89,3 +89,6 @@ function onListening() {
         : 'port ' + addr.port;
     debug('Listening on ' + bind);
 }
+
+//start ws server
+require("../ws.js");
