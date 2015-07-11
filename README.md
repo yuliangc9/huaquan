@@ -68,3 +68,92 @@ player.on("peerWin", function(code)
     console.log("I lose! reason is %s", code);
 });
 ```
+
+#PlayerClient接口
+在客户端封装了一个PlayerClient接口，用于处理内部的client与server交互的逻辑，提供更加抽象的接口。
+文件位置：`public/js/player.js`
+demo位置：`views/test.html`
+
+打开`conf.js`的`http_debug`选项，访问`http://127.0.0.1:8080/test`可看到效果
+
+##connect(cb(err))
+ - `cb` 连接成功或者失败的回调函数
+    - `err` 是否有错误，如果为false表示连接成功，如果为true表示连接失败
+
+与服务器建立连接
+
+##findPeer(cb(peerid))
+ - `cb` 找到对战玩家的回调
+
+寻找对战玩家，当服务器匹配到玩家后，通过`cb`回调返回对方玩家的`peerid`
+
+##choose(selfChoose, peerChoose)
+ - `selfChoose` 玩家选择的本方数字
+ - `peerChoose` 玩家猜测的对方数字
+
+玩家选择数字后，将数字发送给服务端
+
+```js
+var winner = new PlayerClient();
+
+winner.connect(function(err)
+{
+    console.log("winner connect ", err);
+
+    winner.findPeer(function(err, peerid)
+    {
+        console.log("winner find peer ", peerid);
+        winner.choose(3,4);
+    });
+});
+```
+
+##leave()
+与服务端断开连接，当一次对战结束后，都要断开连接
+
+##sendFail(code)
+ - `code` 输赢的错误码，表示原因：
+     - `timeout` 玩家选择超时
+
+当客户端判断本方玩家失败（例如选择超时后），通知服务器，然后需要客户端自己调用`leave`接口与服务端断开连接。
+
+##registerWin/registerLose(cb(code))
+ - `cb` 胜负的回调函数
+     - `code` 输赢的错误码，表示输赢的原因：
+        - `bingo` 本方玩家猜中对方数字
+        - `timeout` 对方玩家选择超时
+        - `leave` 对方玩家退出
+
+注册胜利和失败的回调函数
+
+```js
+var player = new PlayerClient();
+
+player.registerWin(function(code)
+{
+    alert(type + " win! reason is " + code);
+    player.leave();
+});
+player.registerLose(function(code)
+{
+    alert(type + "lose! reason is " + code);
+    player.leave();
+});
+```
+
+##registerPeerChoose(cb(peerSelf, peerPeer))
+ - `cb` 收到对方数字的回调函数
+     - `peerSelf` 对方玩家选择的数字
+     - `peerPeer` 对方玩家猜的本方玩家的数字
+
+注册回调，处理对方选择的数字情况
+
+```js
+player.registerPeerChoose(function(peerSelf, peerPeer)
+{
+    console.log("get peer data ", peerSelf, peerPeer);
+});
+```
+
+##registerLeave(cb())
+注册连接断开的回调事件
