@@ -8,6 +8,7 @@ module.exports =
     //端口配置
     http_port : 8080,
     ws_port : 3030,
+    ws_ip : "127.0.0.1",
 
     //日志配置
     http_log : {
@@ -15,14 +16,19 @@ module.exports =
         pattern : "YYYY-MM-DD-HH",
         frequency : "1h"
     },
-    ws_log : {
-        filename : path.join(__dirname + '/log/hq.log'),
-        type : "dateFile",
-        pattern : "-yyyy-MM-dd-hh",
-        alwaysIncludePattern : false,
-        category: 'huaquan',
-        ws_level : "DEBUG" //TRACE/DEBUG/INFO/WARN/ERROR/FATAL
-    },
+    ws_log : [
+        {
+            type : 'console'
+        },
+        {
+            filename : path.join(__dirname + '/log/hq.log'),
+            type : "dateFile",
+            pattern : "-yyyy-MM-dd-hh",
+            alwaysIncludePattern : false,
+            category: 'huaquan',
+            ws_level : "DEBUG" //TRACE/DEBUG/INFO/WARN/ERROR/FATAL
+        }
+    ],
 
     //http server 调试模式
     http_debug : true

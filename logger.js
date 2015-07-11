@@ -7,7 +7,7 @@ var log4js = require("log4js");
 
 //初始化日志模块配置
 log4js.configure({
-    appenders : [config.ws_log]
+    appenders : config.ws_log
 });
 var logger = log4js.getLogger(config.ws_log.category);
 logger.setLevel(config.ws_log.level);
