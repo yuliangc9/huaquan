@@ -5,18 +5,20 @@ var com = com || {};
 
 com.init = function(stype){
     com.nowStype = stype || com.getCookie("stype") || "stype_normal";
-    var stype = com.stype[com.nowStype];
+    var stype = com.stypes[com.nowStype];
     com.width = stype.width;
     com.height = stype.height;
     com.spaceX = stype.spaceX;
     com.spaceY = stype.spaceY;
     com.pointStartX = stype.pointStartX;
     com.pointStartY = stype.pointStartY;
+    com.countdY = stype.countdY;
     //com.canvas = $('#board');//猜拳主界面
     com.canvas = document.getElementById("board");
     com.ct = com.canvas.getContext("2d");
     com.canvas.width = com.width;
     com.canvas.height = com.height;
+    com.countdownnum = 10;
     com.numberList = com.numberList || [];
     com.loadImages();
 }
@@ -27,17 +29,19 @@ window.onload = function(){
     com.init();
     com.createNumbers(com.initNumber);
 
+
+    //注册开始寻找玩家按钮点击事件
     com.get("start").addEventListener("click", function(e) {
-        if (confirm("确认开始猜拳？")){
-            com.get("loadinfo").style.display = "none";
-            play.isPlay=true ;
+            com.get("logo").style.display = "none";
+            com.get("loading").style.display = "block";
+            play.isPlay=true;
             play.init();
-        }
+
     })
 
 }
 //样式
-com.stype = {
+com.stypes = {
     stype_small:{
         width:325,
         height:402,
@@ -48,11 +52,12 @@ com.stype = {
     },
     stype_normal:{
         width:420,
-        height:512,
+        height:312,
+        countdY:250,
         spaceX:45,
         spaceY:15,
         pointStartX:5,
-        pointStartY:450
+        pointStartY:240
     },
     stype_large:{
         width:712,
@@ -76,6 +81,29 @@ com.loadImages = function () {
     //document.getElementsByTagName("body")[0].style.background = "url(img/bg.jpg)";
 }
 
+com.drawcountdown = function () {
+    com.countdownnum--;
+    com.ct.lineWidth = 10;
+    com.ct.clearRect(0, com.countdY+50, com.width, com.height);
+    com.ct.fillText('倒计时：'+com.countdownnum, 0, com.countdY-20);
+    com.ct.save();
+    com.ct.strokeStyle = '#86e01e';
+    com.ct.beginPath();
+    com.ct.moveTo(0, com.countdY);
+    com.ct.lineTo(com.width, com.countdY);
+    com.ct.stroke();
+    com.ct.beginPath();
+    com.ct.restore();
+    com.ct.moveTo(0, com.countdY);
+    com.ct.lineTo((com.width / 10)*com.countdownnum, com.countdY);
+    com.ct.stroke();
+}
+
+com.tick = function(){
+   if(com.countdownnum == 0) return;
+   com.drawcountdown();
+   window.setTimeout(com.tick,1000);
+}
 
 //获取元素距离页面左侧的距离
 com.getDomXY = function (dom){
@@ -115,7 +143,6 @@ com.createNumbers = function(map){
         com.numbers[map[i]] = new com.class.Number(map[i]);
         com.numbers[map[i]].x = i;
         com.numberList.push(com.numbers[map[i]]);
-
     }
 }
 com.class = com.class || {};
@@ -152,6 +179,24 @@ com.args = {
     'mnb':{text:"我的数字",img:'mnb',my:1,value:99},
     'tnb':{text:"总和",img:'tnb',my:1,value:99}
 };
+
+com.class.result = function (nmb, tnb) {
+    this.pmnb = com[nmb] || 0;
+    this.ptnb = com[tnb] || 0;
+    this.x = com.initNumber.length / 2 + 1;
+    this.y = com.height / 3;
+    this.iShow = true;
+
+    this.show = function(){
+        if(this.iShow){
+            com.ct.save();
+            com.ct.globalAlpha = this.alpha;
+            com.ct.drawImage(this.rmnb.img, com.spaceX * this.x + com.pointStartX, com.spaceY * this.y + com.pointStartY);
+            com.ct.drawImage(this.rtnb.img, com.spaceX * this.x + com.pointStartX, com.spaceY * this.y + com.pointStartY);
+            com.ct.restore();
+        }
+    }
+}
 
 com.class.Number = function(key, x, y){
     this.key = key;
