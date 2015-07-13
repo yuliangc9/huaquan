@@ -6,8 +6,8 @@ play.init = function(){
     play.my = 1;
     play.mnb = null;
     play.tnb = null;
-    play.pmnb = null;
-    play.ptnb = null;
+    play.pmnb = com.numbers['pmnb'];
+    play.ptnb = com.numbers['ptnb'];
     play.isPlay = true;
     play.numberMap = com.initNumber;
     play.show = com.show;
@@ -16,11 +16,6 @@ play.init = function(){
     play.confirm = false;
     play.client = new PlayerClient();
     play.peerid = false;
-    for(var i=0;i<play.numberMap.length;i++){
-        var key = play.numberMap[i];
-        com.numbers[key].x = i;
-        com.numbers[key].isShow = true;
-    }
     com.numbers['1st'].numbertype = 'mnb';
     com.numbers['9th'].numbertype = 'tnb';
     com.canvas.addEventListener("click", play.clickCanvas);
@@ -28,7 +23,7 @@ play.init = function(){
             play.choose();
             play.confirm=true ;
     });
-    //Á¬½Ó·þÎñÆ÷
+    //ï¿½ï¿½ï¿½Ó·ï¿½ï¿½ï¿½ï¿½ï¿½
     play.client.connect(function(err)
     {
         play.findpeer();
@@ -49,8 +44,8 @@ play.findpeer = function(){
     })
 };
 
-//»ñµÃµã»÷µÄ×Åµã
-//µã»÷ÆåÅÌÊÂ¼þ
+//ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½Åµï¿½
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½
 play.clickCanvas = function (e){
     if (!play.isPlay) return false;
     var key = play.getClickNumber(e);
@@ -67,12 +62,10 @@ play.clickCanvas = function (e){
                         play.choosecount = play.choosecount - 1;
                         com.numbers[key].choose = !com.numbers[key].choose;
                         play.choosetype = com.numbers[key].numbertype;
-                        com.numbers[key].numbertype = '';
-                        play.show();
+                        com.numbers['l'+play.choosetype].img = com['l'+play.choosetype].img;
                         return;
                     }
                     else {
-                        play.show();
                         return;
                     }
                 }
@@ -81,15 +74,15 @@ play.clickCanvas = function (e){
                         play.choosecount = play.choosecount - 1;
                         com.numbers[key].choose = !com.numbers[key].choose;
                         play.choosetype = com.numbers[key].numbertype;
+                        com.numbers['l'+play.choosetype].img = com['l'+play.choosetype].img;
                         com.numbers[key].numbertype = '';
-                        play.show();
                         return;
                     }
                     else {
                         play.choosecount = play.choosecount + 1;
                         com.numbers[key].choose = !com.numbers[key].choose;
                         com.numbers[key].numbertype = play.choosetype;
-                        play.show();
+                        com.numbers['l'+play.choosetype].img = com.numbers[key].img;
                         return;
                     };
                 }
@@ -97,8 +90,8 @@ play.clickCanvas = function (e){
                     play.choosecount = play.choosecount + 1;
                     com.numbers[key].choose = !com.numbers[key].choose;
                     com.numbers[key].numbertype = 'mnb';
+                    com.numbers['lmnb'].img = com.numbers[key].img;
                     play.choosetype = 'tnb';
-                    play.show();
                     return;
                 }
             }
@@ -114,11 +107,11 @@ play.clickCanvas = function (e){
 play.initsockevent = function(){
     play.client.registerLeave(function()
     {
-        alert(" ÍøÂçÒì³£¶Ï¿ª!");
+        alert(" ï¿½ï¿½ï¿½ï¿½ï¿½ì³£ï¿½Ï¿ï¿½!");
     });
     play.client.registerWin(function(code)
     {
-        alert("u win! reason is " + code);
+        //alert("u win! reason is " + code);
         player.leave();
     });
     play.client.registerLose(function(code)
@@ -129,6 +122,10 @@ play.initsockevent = function(){
     play.client.registerPeerChoose(function(peerSelf, peerPeer)
     {
         console.log("get peer data ", peerSelf, peerPeer);
+        var pmnbk = play.numberMap[peerSelf-1];
+        var ptnbk = play.numberMap[peerPeer-1];
+        com.numbers['pmnb'].img = com.numbers[pmnbk].img;
+        com.numbers['ptnb'].img = com.numbers[ptnbk].img;
     });
 }
 
@@ -143,10 +140,10 @@ play.choose = function () {
     if(play.mnb && play.tnb){
         play.client.choose(play.mnb.value,play.tnb.value);
     }
-    else console.log('²ÎÊý²»×ã');
+    else console.log('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
 }
 
-//»ñµÃÆå×Ó
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 play.getClickNumber = function (e){
     var clickXY=play.getClickPoint(e);
     var x=clickXY.x;

@@ -15,10 +15,11 @@ com.init = function(stype){
     com.countdY = stype.countdY;
     //com.canvas = $('#board');//猜拳主界面
     com.canvas = document.getElementById("board");
+    com.timeout = false;
     com.ct = com.canvas.getContext("2d");
     com.canvas.width = com.width;
     com.canvas.height = com.height;
-    com.countdownnum = 10;
+    com.countdownnum = 100;
     com.numberList = com.numberList || [];
     com.loadImages();
 }
@@ -52,12 +53,12 @@ com.stypes = {
     },
     stype_normal:{
         width:420,
-        height:312,
+        height:512,
         countdY:250,
         spaceX:45,
         spaceY:15,
         pointStartX:5,
-        pointStartY:240
+        pointStartY:430
     },
     stype_large:{
         width:712,
@@ -81,29 +82,44 @@ com.loadImages = function () {
     //document.getElementsByTagName("body")[0].style.background = "url(img/bg.jpg)";
 }
 
-com.drawcountdown = function () {
-    com.countdownnum--;
+com.draw = function (timeout) {
+    if(!timeout){
+        com.countdownnum--;
+    }
+    cursecond = Math.round(com.countdownnum/10);
     com.ct.lineWidth = 10;
-    com.ct.clearRect(0, com.countdY+50, com.width, com.height);
-    com.ct.fillText('倒计时：'+com.countdownnum, 0, com.countdY-20);
+    com.ct.clearRect(0, 0, com.width, com.height);
+    com.ct.fillText('倒计时：'+cursecond, 0, 60);
+    com.ct.fillText('我选择的数', com.spaceX * 2, com.pointStartY - com.spaceY * 7.5);
+    com.ct.fillText('猜对方的数', com.spaceX * 6, com.pointStartY - com.spaceY * 7.5);
+    com.ct.fillText('对方选的数', com.spaceX * 2, com.pointStartY - com.spaceY * 20.5);
+    com.ct.fillText('对方猜的数', com.spaceX * 6, com.pointStartY - com.spaceY * 20.5);
+
     com.ct.save();
     com.ct.strokeStyle = '#86e01e';
     com.ct.beginPath();
-    com.ct.moveTo(0, com.countdY);
-    com.ct.lineTo(com.width, com.countdY);
+    com.ct.moveTo(0, 40);
+    com.ct.lineTo(com.width, 40);
     com.ct.stroke();
     com.ct.beginPath();
     com.ct.restore();
-    com.ct.moveTo(0, com.countdY);
-    com.ct.lineTo((com.width / 10)*com.countdownnum, com.countdY);
+    com.ct.moveTo(0, 40);
+    com.ct.lineTo((com.width / 10)*cursecond, 40);
     com.ct.stroke();
+    for (var i=0; i<com.numberList.length ; i++){
+        com.numberList[i].show();
+    }
 }
 
 com.tick = function(){
-   if(com.countdownnum == 0) return;
-   com.drawcountdown();
-   window.setTimeout(com.tick,1000);
+   if(com.countdownnum == 0) {
+       com.timeout = true;
+       return;
+   }
+   com.draw();
+   window.setTimeout(com.tick,100);
 }
+
 
 //获取元素距离页面左侧的距离
 com.getDomXY = function (dom){
@@ -140,8 +156,23 @@ com.get = function (id){
 
 com.createNumbers = function(map){
     for(var i=0;i<map.length;i++){
-        com.numbers[map[i]] = new com.class.Number(map[i]);
-        com.numbers[map[i]].x = i;
+        switch (map[i])
+        {
+            case 'lmnb':
+                com.numbers[map[i]] = new com.class.Number(map[i], 2, 12);
+                break;
+            case 'ltnb':
+                com.numbers[map[i]] = new com.class.Number(map[i], 6, 12);
+                break;
+            case 'pmnb':
+                com.numbers[map[i]] = new com.class.Number(map[i], 2, 20);
+                break;
+            case 'ptnb':
+                com.numbers[map[i]] = new com.class.Number(map[i], 6, 20);
+                break;
+            default :
+                com.numbers[map[i]] = new com.class.Number(map[i], i, 0);
+        }
         com.numberList.push(com.numbers[map[i]]);
     }
 }
@@ -151,7 +182,6 @@ com.class.Bg = function(img, x, y){
     this.x = x || 0;
     this.y = y || 0;
     this.isShow = true;
-
     this.show = function(){
         if (this.isShow) com.ct.drawImage(com.bgImg, com.spaceX * this.x, com.spaceY * this.y);
     }
@@ -164,7 +194,7 @@ com.show = function (){
         com.numberList[i].show();
     }
 }
-com.initNumber = ['1st', '2ed', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
+com.initNumber = ['1st', '2ed', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', 'lmnb', 'ltnb', 'pmnb', 'ptnb'];
 
 com.args = {
     '1st':{text:"一",img:'i_n_1',my:1,value:1},
@@ -177,7 +207,11 @@ com.args = {
     '8th':{text:"八",img:'i_n_8',my:1,value:8},
     '9th':{text:"九",img:'i_n_9',my:1,value:9},
     'mnb':{text:"我的数字",img:'mnb',my:1,value:99},
-    'tnb':{text:"总和",img:'tnb',my:1,value:99}
+    'tnb':{text:"总和",img:'tnb',my:1,value:99},
+    'lmnb':{text:"对手出的数字",img:'w_n',my:0,value:0},
+    'ltnb':{text:"对手猜的数字",img:'w_n',my:0,value:0},
+    'pmnb':{text:"对手出的数字",img:'w_n',my:0,value:0},
+    'ptnb':{text:"对手猜的数字",img:'w_n',my:0,value:0}
 };
 
 com.class.result = function (nmb, tnb) {
@@ -191,8 +225,8 @@ com.class.result = function (nmb, tnb) {
         if(this.iShow){
             com.ct.save();
             com.ct.globalAlpha = this.alpha;
-            com.ct.drawImage(this.rmnb.img, com.spaceX * this.x + com.pointStartX, com.spaceY * this.y + com.pointStartY);
-            com.ct.drawImage(this.rtnb.img, com.spaceX * this.x + com.pointStartX, com.spaceY * this.y + com.pointStartY);
+            com.ct.drawImage(this.rmnb.img, com.spaceX * this.x + com.pointStartX,  com.pointStartY - com.spaceY * this.y);
+            com.ct.drawImage(this.rtnb.img, com.spaceX * this.x + com.pointStartX,  com.pointStartY - com.spaceY * this.y);
             com.ct.restore();
         }
     }
@@ -210,13 +244,14 @@ com.class.Number = function(key, x, y){
     this.alpha = 1;
     this.numbertype = '';
     this.choose = false;
+    this.img = com[key].img;
     this.iShow = true;
 
     this.show = function () {
         if(this.iShow){
             com.ct.save();
             com.ct.globalAlpha = this.alpha;
-            com.ct.drawImage(com[key].img, com.spaceX * this.x + com.pointStartX, com.spaceY * this.y + com.pointStartY);
+            com.ct.drawImage(this.img, com.spaceX * this.x + com.pointStartX,  com.pointStartY - com.spaceY * this.y);
             if(this.choose && this.numbertype == 'mnb'){
                 com.ct.drawImage(com['mnb'].img, com.spaceX * this.x + com.pointStartX, com.spaceY * this.y + com.pointStartY - 30);
             }
