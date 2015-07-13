@@ -31,9 +31,24 @@ WE ARE TESTS!!
                 alert(type + "lose! reason is " + code);
                 player.leave();
             });
-            player.registerPeerChoose(function(peerSelf, peerPeer)
+            player.registerPeerChoose(function(peerSelf, peerPeer, isPeerWin, isPeerLose)
             {
-                console.log(type, "get peer data ", peerSelf, peerPeer);
+                console.log(type, "get peer data %s %s peerWin: %s peerLose: %s",
+                        peerSelf, peerPeer, isPeerWin, isPeerLose);
+
+                if (isPeerWin)
+                {
+                    alert(type + " peer get my data...I lose");
+                    player.leave();
+                    return;
+                }
+                if (isPeerLose)
+                {
+                    alert(type + " I get peer data! I win");
+                    player.leave();
+                    return;
+                }
+
                 var s = self_chooses.shift();
                 var p = self_chooses.shift();
 

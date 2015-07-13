@@ -171,11 +171,11 @@ Player.prototype.isReady = function()
  * @param peerSelfData
  * @param peerPeerData
  */
-Player.prototype.sendPeerChoose = function(peerSelfData, peerPeerData)
+Player.prototype.sendPeerChoose = function(peerSelfData, peerPeerData, isPeerWin, isPeerLose)
 {
     var self = this;
 
-    self.socket.emit("peerChoose", peerSelfData, peerPeerData);
+    self.socket.emit("peerChoose", peerSelfData, peerPeerData, isPeerWin, isPeerLose);
 
     return;
 }
@@ -238,8 +238,8 @@ function judgeWinOrLose(player1, player2)
 
         player2.log.info("i win!");
 
-        player1.sendPeerWin(WIN_LOSE_CODE.BINGO);
-        player2.sendPeerFail(WIN_LOSE_CODE.BINGO);
+        //player1.sendPeerWin(WIN_LOSE_CODE.BINGO);
+        //player2.sendPeerFail(WIN_LOSE_CODE.BINGO);
 
         return player2;
     }
@@ -252,8 +252,8 @@ function judgeWinOrLose(player1, player2)
 
         player1.log.info("i win");
 
-        player2.sendPeerWin(WIN_LOSE_CODE.BINGO);
-        player1.sendPeerFail(WIN_LOSE_CODE.BINGO);
+        //player2.sendPeerWin(WIN_LOSE_CODE.BINGO);
+        //player1.sendPeerFail(WIN_LOSE_CODE.BINGO);
 
         return player1;
     }
@@ -279,12 +279,14 @@ Player.prototype.registerPeer = function(p)
         {
             self.log.info("exchange choose data");
 
-            //1. send choose data to each player
-            self.sendPeerChoose(p.selfChoose, p.peerChoose);
-            p.sendPeerChoose(self.selfChoose, self.peerChoose);
+            //1. judge who win who lose
+            var winner = judgeWinOrLose(self, p);
 
-            //2. judge who win who lose
-            judgeWinOrLose(self, p);
+            //2. send choose data to each player
+            self.sendPeerChoose(p.selfChoose, p.peerChoose,
+                winner == p, winner == self);
+            p.sendPeerChoose(self.selfChoose, self.peerChoose,
+                winner == self, winner == p);
 
             //3.. clear choose data
             self.clearChoose();

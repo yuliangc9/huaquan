@@ -41,6 +41,8 @@ PlayerClient.prototype.registerLose = function(cb)
  * @param cb(peerSelf, peerPeer)
  *      peerSelf : number 对方自己选择的数字
  *      peerPeer : number 对方猜的本方玩家的数字
+ *      isPeerWin : 表示对方是否猜中胜利
+ *      isPeerLose : 表示对方是否猜错失败
  */
 PlayerClient.prototype.registerPeerChoose = function(cb)
 {
@@ -176,9 +178,9 @@ PlayerClient.prototype._registerAll = function(s)
         self.leaveCb && self.leaveCb();
         self.socket = null;
     });
-    self.socket.on("peerChoose", function(peerSelf, peerPeer)
+    self.socket.on("peerChoose", function(peerSelf, peerPeer, isPeerWin, isPeerLose)
     {
-        self.peerChooseCb && self.peerChooseCb(Number(peerSelf), Number(peerPeer));
+        self.peerChooseCb && self.peerChooseCb(Number(peerSelf), Number(peerPeer), isPeerWin, isPeerLose);
     });
     self.socket.on("peerWin", function(code)
     {

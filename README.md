@@ -141,10 +141,12 @@ player.registerLose(function(code)
 });
 ```
 
-##registerPeerChoose(cb(peerSelf, peerPeer))
+##registerPeerChoose(cb(peerSelf, peerPeer, isPeerWin, isPeerLose))
  - `cb` 收到对方数字的回调函数
      - `peerSelf` 对方玩家选择的数字
      - `peerPeer` 对方玩家猜的本方玩家的数字
+     - `isPeerWin` 服务器判断对方玩家是否胜利，如果为true，则表示对方胜利，本方失败，如果为false，则表示对方没有胜利，并不表示失败
+     - `isPeerLose` 服务器判断对方玩家是否失败，如果为true，则表示对方失败，本方胜利，如果为false，则表示对方没有失败，并不表示胜利
 
 注册回调，处理对方选择的数字情况
 
